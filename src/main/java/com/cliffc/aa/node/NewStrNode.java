@@ -72,7 +72,7 @@ public abstract class NewStrNode extends NewNode.NewPrimNode<TypeStr> {
       Type sp0 = val(ARG_IDX);
       Type sp1 = val(ARG_IDX+1);
       if( !(m instanceof TypeMem)   ) return m.oob();
-      if( sp0==Type.XNIL && sp1==Type.XNIL ) return TypeTuple.make(TypeObj.UNUSED,Type.XNIL);
+      if( sp0==Type.XNIL && sp1==Type.XNIL ) return TypeTuple.make(Type.CTRL,TypeObj.UNUSED,Type.XNIL);
       if( !sp0.isa(TypeMemPtr.STR0) ) return _value(TypeStr.STR);
       if( !sp1.isa(TypeMemPtr.STR0) ) return _value(TypeStr.STR);
       if( sp0.above_center() || sp1.above_center() ) return Type.ANY;

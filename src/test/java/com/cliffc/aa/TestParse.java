@@ -143,6 +143,7 @@ public class TestParse {
     test("(1;2;)", TypeInt.con(2)); // final semicolon is optional
     test("{_+_}(1;2 ,3)", TypeInt.con(5)); // statements in arguments
     test("{_+_}(1;2;,3)", TypeInt.con(5)); // statements in arguments
+    test("0+0+3", TypeInt.con(3)); // Ambiguous 0+0
     // Operators squished together
     test("-1== -1",  TypeInt.TRUE);
     test("0== !!1",  TypeInt.FALSE);
