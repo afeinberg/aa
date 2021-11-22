@@ -13,9 +13,9 @@ public class TestHM9 {
 
   private void run( String prog, String rez_hm, Type rez_gcp ) {
     Root syn = HM9.hm(prog);
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals(rez_hm,syn._hmt.p());
-    if( HM.DO_GCP )
+    if( HM9.DO_GCP )
       assertEquals(rez_gcp,syn.flow_type());
   }
   // Simple no-arg signature returning the type
@@ -51,10 +51,10 @@ public class TestHM9 {
   // This unifies 3 and "abc" which results in 'all'
   @Test public void test05() {
     Root syn = HM9.hm("({ x -> (pair (x 3) (x 5)) } {y->y})");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("( nint8, nint8)[7]",syn._hmt.p());
-    if( HM.DO_GCP )
-      if( HM.DO_HM )
+    if( HM9.DO_GCP )
+      if( HM9.DO_HM )
         assertEquals(tuple82,syn.flow_type());
       else
         assertEquals(tuple82,syn.flow_type());
@@ -62,10 +62,10 @@ public class TestHM9 {
 
   @Test public void test06() {
     Root syn = HM9.hm("id={x->x}; (pair (id 3) (id \"abc\"))");
-    if( HM.DO_HM ) // HM is sharper here than in test05, because id is generalized per each use site
+    if( HM9.DO_HM ) // HM is sharper here than in test05, because id is generalized per each use site
       assertEquals("( 3, *[4]\"abc\")[7]",syn._hmt.p());
-    if( HM.DO_GCP )
-      if( HM.DO_HM )
+    if( HM9.DO_GCP )
+      if( HM9.DO_HM )
         assertEquals(TypeMemPtr.make(7,TypeStruct.maket(TypeInt.con(3),TypeMemPtr.make(4,TypeStr.ABC))),syn.flow_type());
       else
         assertEquals(tuplen2,syn.flow_type());
@@ -105,10 +105,10 @@ public class TestHM9 {
   @Test public void test14() {
     Root syn = HM9.hm("map = { fun -> { x -> (fun x)}};"+
                      "(pair ((map str) 5) ((map factor) 2.3))");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("( *[4]str, flt64)[7]",syn._hmt.p());
-    if( HM.DO_GCP )
-      if( HM.DO_HM )
+    if( HM9.DO_GCP )
+      if( HM9.DO_HM )
         assertEquals(TypeMemPtr.make(7,TypeStruct.maket(TypeMemPtr.STRPTR,TypeFlt.FLT64)),syn.flow_type());
       else
         assertEquals(tuple2,syn.flow_type());
@@ -141,10 +141,10 @@ public class TestHM9 {
     Root syn = HM9.hm("fcn = {p -> (if p {a -> (pair a a)} {b -> (pair b (pair 3 b))})};"+
                      "map = { fun x -> (fun x)};"+
                      "{ q -> (map (fcn q) 5)}");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("{ A -> ( B:Cannot unify A:( 3, $A)[7] and 5, $B)[7] }",syn._hmt.p());
-    if( HM.DO_GCP )
-      if( HM.DO_HM )
+    if( HM9.DO_GCP )
+      if( HM9.DO_HM )
         assertEquals(tfs(TypeMemPtr.make(7,TypeStruct.maket(Type.XNSCALR,TypeMemPtr.make(7,TypeStruct.maket(TypeInt.con(3),Type.XNSCALR))))),syn.flow_type());
       else
         assertEquals(tfs(TypeMemPtr.make(7,TypeStruct.maket(TypeInt.con(5),Type.NSCALR))),syn.flow_type());
@@ -167,10 +167,10 @@ public class TestHM9 {
                      "cdr ={mycons -> (mycons { p q -> q})};"+
                      "map ={fun parg -> (fun (cdr parg))};"+
                      "(pair (map str (cons 0 5)) (map isempty (cons 0 \"abc\")))");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("( *[4]str, int1)[7]",syn._hmt.p());
-    if( HM.DO_GCP )
-      if( HM.DO_HM )
+    if( HM9.DO_GCP )
+      if( HM9.DO_HM )
         assertEquals(TypeMemPtr.make(7,TypeStruct.maket(TypeMemPtr.STRPTR,TypeInt.BOOL)),syn.flow_type());
       else
         assertEquals(tuple2,syn.flow_type());
@@ -253,9 +253,9 @@ public class TestHM9 {
   // and writing an infinite output), gcp gets a cyclic approximation.
   @Test public void test32() {
     Root syn = HM9.hm("map = { fcn lst -> @{ n1 = (map fcn .n0 lst), v1 = (fcn .v0 lst) } }; map");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("{ { A -> B } C:@{ n0 = $C, v0 = $A}[] -> D:@{ n1 = $D, v1 = $B}[9] }",syn._hmt.p());
-    if( HM.DO_GCP )
+    if( HM9.DO_GCP )
       // Build a cycle of length 2, without nil.
       assertEquals(tfs(build_cycle(9,false,Type.SCALAR)),syn.flow_type());
   }
@@ -265,9 +265,9 @@ public class TestHM9 {
   // made before calling 'map').
   @Test public void test33() {
     Root syn = HM9.hm("map = { fcn lst -> (if lst @{ n1=(map fcn .n0 lst), v1=(fcn .v0 lst) } 0) }; map");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("{ { A -> B } C:@{ n0 = $C, v0 = $A}[0] -> D:@{ n1 = $D, v1 = $B}[0,9] }",syn._hmt.p());
-    if( HM.DO_GCP )
+    if( HM9.DO_GCP )
       // Build a cycle of length 2, with nil.
       assertEquals(tfs(build_cycle(9,true,Type.SCALAR)),syn.flow_type());
   }
@@ -275,9 +275,9 @@ public class TestHM9 {
   // Recursive linked-list discovery, with no end clause
   @Test public void test34() {
     Root syn = HM9.hm("map = { fcn lst -> (if lst @{ n1 = (map fcn .n0 lst), v1 = (fcn .v0 lst) } 0) }; (map dec @{n0 = 0, v0 = 5})");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("A:@{ n1 = $A, v1 = int64}[0,9]",syn._hmt.p());
-    if( HM.DO_GCP )
+    if( HM9.DO_GCP )
       assertEquals(build_cycle(9,true,TypeInt.con(4)),syn.flow_type());
   }
 
@@ -301,9 +301,9 @@ public class TestHM9 {
   // rolls up, sometimes not; depends on worklist visitation order.
   @Test public void test36() {
     Root syn = HM9.hm("map = { lst -> (if lst @{ n1= arg= .n0 lst; (if arg @{ n1=(map .n0 arg), v1=(str .v0 arg)} 0), v1=(str .v0 lst) } 0) }; map");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("{ A:@{ n0 = @{ n0 = $A, v0 = int64}[0], v0 = int64}[0] -> B:@{ n1 = @{ n1 = $B, v1 = *[4]str}[0,9], v1 = *[4]str}[0,10] }",syn._hmt.p());
-    if( HM.DO_GCP ) {
+    if( HM9.DO_GCP ) {
       TypeStruct cycle_strX;
       if( true ) {
         // Unrolled, known to only produce results where either other nested
@@ -341,9 +341,9 @@ public class TestHM9 {
   // argument type - and the worse case will be an error.
   @Test public void test39() {
     Root syn = HM9.hm("x = { z -> z}; (x { y -> .u y})");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("{ @{ u = A}[] -> $A }",syn._hmt.p());
-    if( HM.DO_GCP )
+    if( HM9.DO_GCP )
       assertEquals(tfs(Type.SCALAR), syn.flow_type());
   }
 
@@ -353,10 +353,10 @@ public class TestHM9 {
   // The first arg to x is two different kinds of functions, so fails unification.
   @Test public void test40() {
     Root syn = HM9.hm("x = w = (x x); { z -> z}; (x { y -> .u y})");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("Cannot unify A:{ $A -> $A } and @{ u = A}[]",syn._hmt.p());
-    if( HM.DO_GCP ) {
-      if( HM.DO_HM ) {
+    if( HM9.DO_GCP ) {
+      if( HM9.DO_HM ) {
         assertEquals(tfs(Type.SCALAR), syn.flow_type());
       } else {
         assertEquals(Type.SCALAR, syn.flow_type());
@@ -378,10 +378,10 @@ public class TestHM9 {
                      "out_str = (map in_int str); " +
                      "out_bool= (map in_str { xstr -> (eq xstr \"def\")}); "+
                      "(pair out_str out_bool)");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("( *[4]str, int1)[7]",syn._hmt.p());
-    if( HM.DO_GCP )
-      if( HM.DO_HM )
+    if( HM9.DO_GCP )
+      if( HM9.DO_HM )
         assertEquals(TypeMemPtr.make(7,TypeStruct.maket(TypeMemPtr.STRPTR,TypeInt.BOOL)),syn.flow_type());
       else
         assertEquals(tuple2,syn.flow_type());
@@ -390,35 +390,35 @@ public class TestHM9 {
   // CCP Can help HM
   @Test public void test42() {
     Root syn = HM9.hm("pred = 0; s1 = @{ x=\"abc\" }; s2 = @{ y=3.4 }; .y (if pred s1 s2)");
-    if( HM.DO_HM ) {
-      if( HM.DO_GCP )
+    if( HM9.DO_HM ) {
+      if( HM9.DO_GCP )
         assertEquals("3.4000000953674316",syn._hmt.p());
       else
         assertEquals("Missing field y in @{ x = *[4]\"abc\"}[9]",syn._hmt.p());
     }
-    if( HM.DO_GCP )
+    if( HM9.DO_GCP )
       assertEquals(TypeFlt.con(3.4f), syn.flow_type());
   }
 
   // The z-merge is ignored; the last s2 is a fresh (unmerged) copy.
   @Test public void test43() {
     Root syn = HM9.hm("pred = 0; s1 = @{ x=\"abc\" }; s2 = @{ y=3.4 }; z = (if pred s1 s2); .y s2");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("3.4000000953674316",syn._hmt.p());
-    if( HM.DO_GCP )
+    if( HM9.DO_GCP )
       assertEquals(TypeFlt.con(3.4f), syn.flow_type());
   }
 
 
   @Test public void test44() {
     Root syn = HM9.hm("fun = (if (isempty \"abc\") {x->x} {x->1.2}); (fun @{})");
-    if( HM.DO_HM ) {
-      if( HM.DO_GCP )
+    if( HM9.DO_HM ) {
+      if( HM9.DO_GCP )
         assertEquals("1.2000000476837158",syn._hmt.p());
       else
         assertEquals("Cannot unify 1.2000000476837158 and )[9]",syn._hmt.p());
     }
-    if( HM.DO_GCP )
+    if( HM9.DO_GCP )
       assertEquals(TypeFlt.con(1.2f), syn.flow_type());
   }
 
@@ -438,13 +438,13 @@ public class TestHM9 {
 "   )"+
 "};" +
 "(loop \"def\" (id 2))");
-    if( HM.DO_HM )
-      assertEquals(HM.DO_GCP
+    if( HM9.DO_HM )
+      assertEquals(HM9.DO_GCP
                    ? "*[4]str"  // Both HM and GCP
                    : "Cannot unify *[4]\"abc\" and 3", // HM alone cannot do this one
                    syn._hmt.p());
-    if( HM.DO_GCP )
-      assertEquals(HM.DO_HM
+    if( HM9.DO_GCP )
+      assertEquals(HM9.DO_HM
                    ? TypeMemPtr.STRPTR // Both HM and GCP
                    : Type.NSCALR,      // GCP alone gets a very weak answer
                    syn.flow_type());
@@ -472,10 +472,10 @@ public class TestHM9 {
                      "        (map {str1 -> (if str1 .x str1 4)} (if pred @{x = 5} 0))\n" +
                      "  )\n"+
                      "}");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("{ A -> ( 3, nint8)[7] }",syn._hmt.p());
-    if( HM.DO_GCP )
-      if( HM.DO_HM ) tfs(TypeMemPtr.make(7,TypeStruct.maket(TypeInt.con(3), TypeInt.NINT8 )));
+    if( HM9.DO_GCP )
+      if( HM9.DO_HM ) tfs(TypeMemPtr.make(7,TypeStruct.maket(TypeInt.con(3), TypeInt.NINT8 )));
       else           tfs(TypeMemPtr.make(7,TypeStruct.maket(TypeInt.NINT8 , TypeInt.NINT8 )));
   }
 
@@ -487,10 +487,10 @@ public class TestHM9 {
                      "        (map {str1 ->          .x str1   } (if pred @{x = 5} 0))\n" +
                      "  )\n"+
                      "}");
-    if( HM.DO_HM )
+    if( HM9.DO_HM )
       assertEquals("{ A -> May be nil when loading field x }",syn._hmt.p());
-    if( HM.DO_GCP )
-      if( HM.DO_HM ) tfs(TypeMemPtr.make(7,TypeStruct.maket(TypeInt.con(3), TypeInt.NINT8 )));
+    if( HM9.DO_GCP )
+      if( HM9.DO_HM ) tfs(TypeMemPtr.make(7,TypeStruct.maket(TypeInt.con(3), TypeInt.NINT8 )));
       else           tfs(TypeMemPtr.make(7,TypeStruct.maket(TypeInt.NINT8 , TypeInt.NINT8 )));
   }
 

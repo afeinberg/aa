@@ -1,6 +1,6 @@
 package com.cliffc.aa.HM;
 
-import com.cliffc.aa.HM.HM.Root;
+import com.cliffc.aa.HM.HM10.Root;
 import com.cliffc.aa.type.*;
 import org.junit.Test;
 
@@ -8,11 +8,11 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestHM {
+public class TestHM10 {
 
   private void _run0( String prog, String rez_hm, Supplier<Type> frez_gcp, int rseed ) {
-    HM.reset();
-    Root syn = HM.hm(prog, rseed, rez_hm!=null, frez_gcp!=null );
+    HM10.reset();
+    Root syn = HM10.hm(prog, rseed, rez_hm!=null, frez_gcp!=null );
     if(  rez_hm !=null )  assertEquals(stripIndent(rez_hm),stripIndent(syn._hmt.p()));
     if( frez_gcp!=null )  assertEquals(frez_gcp.get(),syn.flow_type());
   }
@@ -25,8 +25,8 @@ public class TestHM {
 
   // Run same program in all 3 combinations
   private void run( String prog, String rez_hm, Supplier<Type> frez_gcp ) {
-    //_run1(prog,rez_hm,frez_gcp);
-    //_run1(prog,rez_hm,null    );
+    _run1(prog,rez_hm,frez_gcp);
+    _run1(prog,rez_hm,null    );
     _run1(prog,null  ,frez_gcp);
   }
   private void run( String prog, String rez_hm, Type rez_gcp ) {
@@ -35,8 +35,8 @@ public class TestHM {
 
   // Run same program in all 3 combinations, but answers vary across combos
   private void run( String prog, String rez_hm_gcp, String rez_hm_alone, Supplier<Type> frez_gcp_hm, Supplier<Type> frez_gcp_alone ) {
-    //_run1(prog,rez_hm_gcp  ,frez_gcp_hm   );
-    //_run1(prog,rez_hm_alone,null          );
+    _run1(prog,rez_hm_gcp  ,frez_gcp_hm   );
+    _run1(prog,rez_hm_alone,null          );
     _run1(prog,null        ,frez_gcp_alone);
   }
   private void run( String prog, String rez_hm_gcp, String rez_hm_alone, Type rez_gcp_hm, Type rez_gcp_alone ) {
@@ -108,10 +108,6 @@ public class TestHM {
 
   @Test public void test02() { run( "{ x -> (pair 3 x) }" ,
                                     "{ A -> ( 3, A) }", tfs(TypeMemPtr.make(7,make_tups(TypeInt.con(3),Type.SCALAR)))); }
-
-  @Test public void test69() { run( "{ x y -> (triple 3 x (y 4)) }" ,
-                                    "{ A -> { B -> (     (     3, A),B) } }",
-                                    tfs(TypeMemPtr.make(8,make_tups(TypeInt.con(3),Type.SCALAR,Type.SCALAR)))); }
 
   @Test public void test03() { run( "{ z -> (pair (z 0) (z \"abc\")) }" ,
                                     "{ { *[0,4]str? -> A } -> ( A, A) }", tfs(tuple2)); }
@@ -278,7 +274,7 @@ map ={fun parg -> (fun (cdr parg))};
         "int1", TypeInt.BOOL);
   }
 
-  @Test public void test67() {
+  @Test public void test23x() {
     run("""
 all = @{
   is_even = { dsp n -> (if (eq0 n) 0 (dsp.is_odd  dsp (dec n)))},
@@ -289,7 +285,7 @@ all = @{
         "{int64 -> int1}", tfs(TypeInt.BOOL));
   }
 
-  @Test public void test68() {
+  @Test public void test23y() {
     run("dsp = @{  id = { dsp n -> n}}; (pair (dsp.id dsp 3) (dsp.id dsp \"abc\"))",
         "( 3, *[4]\"abc\")",
         "( 3, *[4]\"abc\")",
@@ -546,7 +542,7 @@ loop = { name cnt ->
         "{ A? -> ( 3, May be nil when loading field x ) }",
         "{ A? -> ( 3, May be nil when loading field x ) }",
         tfs(TypeMemPtr.make(7,make_tups(TypeInt.con(3), TypeInt.con(5) ))),
-        tfs(TypeMemPtr.make(7,make_tups(TypeInt.NINT8 , TypeInt.NINT8 ))));
+        tfs(TypeMemPtr.make(7,make_tups(TypeInt.con(3), TypeInt.con(5) ))));
   }
 
   @Test public void test51() {
@@ -607,7 +603,7 @@ loop = { name cnt ->
           Type xbool= TypeMemPtr.make(12,TypeStruct.make(NO_DSP,
                                                          TypeFld.make("true", tf),
                                                          TypeFld.make("false",tf),
-                                                         mfun(1,"force",tf,21)));
+                                                         mfun(1,"force",tf,23)));
           TypeStruct rez = TypeStruct.make(NO_DSP,
                                            // With lift ON
                                            //TypeFld.make("a", HM.DO_HM ? TypeInt.NINT8 : Type.SCALAR),
@@ -726,7 +722,7 @@ all
           TypeFld not46 = mfun(1,"not",TypeMemPtr.make(ptr90(),TypeStruct.make(NO_DSP,mfun(1,"not",14,16),te57)),14,16);
           TypeFld not6  = mfun(1,"not",TypeMemPtr.make(   9   ,TypeStruct.make(NO_DSP,mfun(1,"not",14   ),te5 )),   16);
           TypeFld not4  = mfun(1,"not",TypeMemPtr.make(   10  ,TypeStruct.make(NO_DSP,mfun(1,"not",16   ),te7 )),   14);
-          TypeFld bs = mfun(1,"boolSub",TypeMemPtr.make(ptr90(),TypeStruct.make(NO_DSP,not46,te57)),19);
+          TypeFld bs = mfun(1,"boolSub",TypeMemPtr.make(ptr90(),TypeStruct.make(NO_DSP,not46,te57)),21);
           TypeFld f = mptr("false",10,TypeStruct.make(NO_DSP,not6,te7));
           TypeFld t = mptr("true" , 9,TypeStruct.make(NO_DSP,not4,te5));
           return TypeMemPtr.make(11,TypeStruct.make(NO_DSP,bs,f,t));
@@ -865,6 +861,10 @@ three =(n.s two);     // Three is the successor of two
   // Broken from Marco; function 'f' clearly uses 'p2.a' but example 'res1' does not
   // pass in a field 'a'... and still no error.  Fixed.
   @Test public void test61() {
+    _run0("f = { p1 p2 -> (if p2.a p1 p2)};"+"(f @{a=2}   @{b=2.3})",
+      "@{ a= Missing field a }",
+      () -> TypeMemPtr.make(ptr90(),
+        TypeStruct.make(NO_DSP)),0);
     run("f = { p1 p2 -> (if p2.a p1 p2)};"+"(f @{a=2}   @{b=2.3})",
         "@{ a= Missing field a }",
         () -> TypeMemPtr.make(ptr90(),
@@ -993,12 +993,12 @@ all
           TypeFld f = TypeFld.make("false",tf);
           TypeFld t = TypeFld.make("true",tf);
 
-          TypeFld s = mfun("s",33);
+          TypeFld s = mfun("s",35);
 
           TypeFld pred  = mfun(1,"pred",Type.XSCALAR,14);
-          TypeFld isZero= mfun(1,"isZero",tf,23);
-          TypeFld add   = mfun("add"   ,25);
-          TypeFld succ  = mfun("succ"  ,24);
+          TypeFld isZero= mfun(1,"isZero",tf,25);
+          TypeFld add   = mfun("add"   ,27);
+          TypeFld succ  = mfun("succ"  ,26);
           TypeFld z = TypeFld.make("z",TypeMemPtr.make(BitsAlias.make0(12),TypeStruct.make(NO_DSP,pred,isZero,add,succ)));
           return TypeMemPtr.make(BitsAlias.make0(14),TypeStruct.make(NO_DSP,f,t,s,z));
         });
@@ -1035,11 +1035,11 @@ maybepet = petcage.get;
         "(nflt32,nflt32,*[4]str)",
         "(nflt32,nflt32,*[4]str)",
         // With lift ON
-        //TypeMemPtr.make(8, make_tups(TypeFlt.NFLT32, TypeFlt.NFLT32, TypeMemPtr.STRPTR)),
-        //TypeMemPtr.make(8, make_tups(TypeFlt.NFLT32, TypeFlt.NFLT32, TypeMemPtr.STRPTR)));
+        TypeMemPtr.make(8, make_tups(TypeFlt.NFLT32, TypeFlt.NFLT32, TypeMemPtr.STRPTR)),
+        TypeMemPtr.make(8, make_tups(TypeFlt.NFLT32, TypeFlt.NFLT32, TypeMemPtr.STRPTR)));
         // With lift OFF
-        TypeMemPtr.make(8, make_tups(Type.SCALAR  , Type.SCALAR  , TypeMemPtr.STRPTR)),
-        TypeMemPtr.make(8, make_tups(Type.SCALAR  , Type.SCALAR  , TypeMemPtr.STRPTR)) );
+        //TypeMemPtr.make(8, make_tups(Type.SCALAR  , Type.SCALAR  , TypeMemPtr.STRPTR)),
+        //TypeMemPtr.make(8, make_tups(Type.SCALAR  , Type.SCALAR  , TypeMemPtr.STRPTR)) );
   }
 
 }

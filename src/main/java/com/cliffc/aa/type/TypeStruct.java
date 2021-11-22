@@ -541,7 +541,7 @@ public class TypeStruct extends TypeObj<TypeStruct> implements Cyclic {
   // Approximate an otherwise endless unrolled sequence of:
   //    ...TMP[alias] -> Struct -> [FunPtr]* -> TMP[alias] -> Struct -> ...
   public TypeStruct approx( int cutoff, BitsAlias aliases ) { return approx2(cutoff,aliases); }
-  
+
   // By chopping off the endless tail, pulling it back one recursion layer and
   // meeting.  This forces unrolled part to look like the cyclic part (at least
   // past the cutoff), which then re-rolls.  Used to prevent endless growth of
