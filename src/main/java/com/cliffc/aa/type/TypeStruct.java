@@ -547,7 +547,28 @@ public class TypeStruct extends TypeObj<TypeStruct> implements Cyclic {
   // past the cutoff), which then re-rolls.  Used to prevent endless growth of
   // otherwise cyclic types.
 
-  // This version is NOT associative with meet: A.apx.B != A.B.apx
+  /**
+   This version is NOT associative with meet: A.apx.B != A.B.apx
+
+  "Wrap-and-Approx" is not monotonic!  Can only happen if we have a nested
+  instance of alias#12.  This can happen from an ordinary MEET.
+  
+  [12]@{                               [12]@{
+    pred=~scalar                         pred=~scalar
+    succ= *[12]@{     >>> FALLS >>>      succ= scalar // Succ field falls
+      pred=*[12]@{ something }         }
+    }
+  }
+  
+  ----- Approx on [12] for both types: -----
+  [12]@{                               [12]@{
+    pred= $recursive$  <<< LIFTS <<<     pred=~scalar 
+    succ= $recursive$                    succ= scalar
+  }                                    }
+  
+  */
+  
+  
   private static final IHashMap OLD2APX = new IHashMap();
   private static final Ary<TypeMemPtr> CUTOFFS = new Ary<>(TypeMemPtr.class);
   public TypeStruct approx1( int cutoff, BitsAlias aliases ) {
@@ -570,7 +591,7 @@ public class TypeStruct extends TypeObj<TypeStruct> implements Cyclic {
       assert OLD2APX.isEmpty() && MEETS0.isEmpty() && CUTOFFS.isEmpty();
       TypeMemPtr apxptr = ax_impl_ptr( aliases, cutoff, 0, ptr, ptr );
       assert CUTOFFS.isEmpty();
-      MEETS0.clear();
+      OLD2APX.clear();  MEETS0.clear();
       RECURSIVE_MEET--;
       // apxptr may die/recycle at install, and may include e.g. nil where the
       // original aliases do not
@@ -578,7 +599,6 @@ public class TypeStruct extends TypeObj<TypeStruct> implements Cyclic {
       // Remove any leftover internal duplication.
       TypeStruct rez = ((TypeStruct)apxptr._obj).install();
       assert this.isa(rez);
-      OLD2APX.clear();
       ptr = TypeMemPtr.make(aliases2,rez);
     }
   }
@@ -718,7 +738,10 @@ public class TypeStruct extends TypeObj<TypeStruct> implements Cyclic {
       if( old == Type.NIL || old == Type.XNIL ) return nptr.ax_meet_nil(old);
       if( old == Type.SCALAR ) return old;
       if( old == Type.XSCALAR || old == Type.ANY ) break; // Result is the nt unchanged
-      if( !(old instanceof TypeMemPtr) ) return Type.SCALAR; // Not a TMP
+      if( !(old instanceof TypeMemPtr) ) {
+        if( old instanceof Cyclic && ((Cyclic)old).cyclic() ) bs.clr(nt._uid,old._uid);
+        return Type.SCALAR; // Not a TMP
+      }
       TypeMemPtr optr = (TypeMemPtr)old;
       nptr._aliases = nptr._aliases.meet(optr._aliases);
       nptr._obj = (TypeObj)ax_meet(bs,nptr._obj,optr._obj);
