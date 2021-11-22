@@ -761,7 +761,7 @@ public class TypeStruct extends TypeObj<TypeStruct> implements Cyclic {
   // By chopping off the endless tail, and meeting it with SCALAR.
 
   // This version IS associative with meet: A.apx.B == A.B.apx
-  private static final IHashMap AXCYCLIC = new IHashMap();
+  private static final Ary<IHashMap> AXCYCLICS = new Ary<>(IHashMap.class);
   public TypeStruct approx2( int cutoff, BitsAlias aliases ) {
     // Fast-path cutout for boring structs
     boolean shallow=true;
@@ -770,7 +770,9 @@ public class TypeStruct extends TypeObj<TypeStruct> implements Cyclic {
           (fld._t instanceof TypeFunPtr && !((TypeFunPtr)fld._t)._ret.is_simple()) )
         { shallow=false; break; }
     if( shallow ) return this;  // Fast cutout for boring structs
-    AXCYCLIC.clear();
+    for( int i=0; i<cutoff; i++ )
+      if( i>= AXCYCLICS._len ) AXCYCLICS.push(new IHashMap());
+      else AXCYCLICS.at(i).clear();
     Type apx = _apx(cutoff-1,aliases,this);
     apx = apx.install();
     return (TypeStruct)apx;
@@ -779,14 +781,14 @@ public class TypeStruct extends TypeObj<TypeStruct> implements Cyclic {
   // deep clone, lowering cutoff at TMP, chopping off when cutoff hits 0
   private static Type _apx( int cutoff, BitsAlias aliases, Type t ) {
     if( !(t instanceof Cyclic) ) return t;
-    Type c = AXCYCLIC.get(t);     // Check for cycles
-    if( c!=null ) return c;       // Return prior
-    AXCYCLIC.put(t,c = t.copy()); // Stop cycles
-    if( c instanceof TypeMemPtr && aliases.overlaps(((TypeMemPtr)c)._aliases) ) {
+    if( t instanceof TypeMemPtr && aliases.overlaps(((TypeMemPtr)t)._aliases) ) {
       if( cutoff == 0 )
-        return AXCYCLIC.put(t,Type.SCALAR); // Cutoff to Scalar
-      cutoff--;                             // Lower cutoff
+        return Type.SCALAR;     // Cutoff to Scalar
+      cutoff--;                 // Lower cutoff
     }
+    Type c = AXCYCLICS.at(cutoff).get(t);     // Check for cycles
+    if( c!=null ) return c;                   // Return prior
+    AXCYCLICS.at(cutoff).put(t,c = t.copy()); // Stop cycles
     // Recursively apply
     final int fcutoff = cutoff;
     ((Cyclic)c).walk_update(fld -> _apx(fcutoff,aliases,fld));

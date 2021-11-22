@@ -922,29 +922,29 @@ all=
   void = @{};
   err  = {unused->(err unused)};
   true = @{
-    and      = {b -> b}
-    or       = {b -> all.true}
-    thenElse = {then else->(then void) }
+    and  = {b -> b}
+    or   = {b -> all.true}
+    then = {then else->(then void) }
     };
   false = @{
-    and      = {b -> all.false}
-    or       = {b -> b}
-    thenElse = {then else->(else void) }
+    and  = {b -> all.false}
+    or   = {b -> b}
+    then = {then else->(else void) }
     };
   boolSub ={b ->(if b true false)};
   z = @{
-    isZero = {unused ->all.true}
+    zero = {unused ->all.true}
     pred = err
     succ = {n -> (all.s n)}
-    add = {n-> n}
+    add_ = {n-> n}
     };
-  orZero = {n ->(true.thenElse {unused ->n} {unused ->z})};
+  orZero = {n ->(true.then {unused ->n} {unused ->z})};
   s = {pred ->
     self=@{
-      isZero = {unused ->all.false}
+      zero = {unused ->all.false}
       pred = {unused->pred}
       succ = {unused -> (all.s self)}
-      add ={m -> (self.succ (pred.add m))}
+      add_ ={m -> (self.succ (pred.add_ m))}
       };
     (orZero self)
     };
@@ -957,12 +957,12 @@ all
   false=A:@{
     and={A->A};
     or={A->A};
-    thenElse={{()->B}{()->B}->B}
+    then={{()->B}{()->B}->B}
     };
   s={
     C:@{
-      add={C->C};
-      isZero={D->A};
+      add_={C->C};
+      zero={D->A};
       pred={E->C};
       succ={C->C}
       }
@@ -970,8 +970,8 @@ all
     };
   true=A;
   z=@{
-    add={F->F};
-    isZero={G->A};
+    add_={F->F};
+    zero={G->A};
     pred={H->I};
     succ={C->C}
     }
@@ -979,27 +979,27 @@ all
 """,
         /*
          *[14]@{^    =any;
-                false=*[10,11]@{$; and=[15,18]{any ->Scalar }; or=[16,19]{any ->Scalar }; thenElse=[17,20]{any ->Scalar }};
+                false=*[10,11]@{$; and=[15,18]{any ->Scalar }; or=[16,19]{any ->Scalar }; then=[17,20]{any ->Scalar }};
                 true = tf$;
                 s    = [  35 ]{any ->Scalar };
-                z=*[12]@{$; add=[27]{any ->Scalar }; isZero=[25]{any ->tf$ }; pred=[14]{any ->Scalar }; succ=[26]{any ->Scalar }}
+                z=*[12]@{$; add_=[27]{any ->Scalar }; zero=[25]{any ->tf$ }; pred=[14]{any ->Scalar }; succ=[26]{any ->Scalar }}
           }
         */
         () -> {
           TypeFld and = bfun2("and" ,15,18,1);
           TypeFld or  = bfun2("or"  ,16,19,1);
-          TypeFld thn = bfun2("thenElse",17,20,2);
+          TypeFld thn = bfun2("then",17,20,2);
           TypeMemPtr tf = TypeMemPtr.make(ptr1011(),TypeStruct.make(NO_DSP,and,or,thn));
           TypeFld f = TypeFld.make("false",tf);
           TypeFld t = TypeFld.make("true",tf);
 
           TypeFld s = mfun("s",33);
 
-          TypeFld pred  = mfun(1,"pred",Type.XSCALAR,14);
-          TypeFld isZero= mfun(1,"isZero",tf,23);
-          TypeFld add   = mfun("add"   ,25);
-          TypeFld succ  = mfun("succ"  ,24);
-          TypeFld z = TypeFld.make("z",TypeMemPtr.make(BitsAlias.make0(12),TypeStruct.make(NO_DSP,pred,isZero,add,succ)));
+          TypeFld pred= mfun(1,"pred",Type.XSCALAR,14);
+          TypeFld zero= mfun(1,"zero",tf,23);
+          TypeFld add_= mfun("add_"  ,25);
+          TypeFld succ= mfun("succ"  ,24);
+          TypeFld z = TypeFld.make("z",TypeMemPtr.make(BitsAlias.make0(12),TypeStruct.make(NO_DSP,pred,zero,add_,succ)));
           return TypeMemPtr.make(BitsAlias.make0(14),TypeStruct.make(NO_DSP,f,t,s,z));
         });
   }

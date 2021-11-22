@@ -102,7 +102,7 @@ public class HM {
   // Mapping from primitive name to PrimSyn
   static final HashMap<String,PrimSyn> PRIMSYNS = new HashMap<>();
   // Precision of cyclic GCP types
-  static final int CUTOFF=2;
+  static final int CUTOFF=1;
 
   static { BitsAlias.init0(); BitsFun.init0(); }
 
