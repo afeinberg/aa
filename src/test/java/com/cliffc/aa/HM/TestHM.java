@@ -1038,8 +1038,8 @@ maybepet = petcage.get;
         //TypeMemPtr.make(8, make_tups(TypeFlt.NFLT32, TypeFlt.NFLT32, TypeMemPtr.STRPTR)),
         //TypeMemPtr.make(8, make_tups(TypeFlt.NFLT32, TypeFlt.NFLT32, TypeMemPtr.STRPTR)));
         // With lift OFF
-        TypeMemPtr.make(8, make_tups(Type.SCALAR  , Type.SCALAR  , TypeMemPtr.STRPTR)),
-        TypeMemPtr.make(8, make_tups(Type.SCALAR  , Type.SCALAR  , TypeMemPtr.STRPTR)) );
+        TypeMemPtr.make(8, make_tups(Type.SCALAR  , Type.SCALAR  , Type.SCALAR)),
+        TypeMemPtr.make(8, make_tups(Type.SCALAR  , Type.SCALAR  , Type.SCALAR)) );
   }
 
 }
