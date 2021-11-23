@@ -93,12 +93,6 @@ public class TestHM {
     return mptr(fld,alias,TypeStruct.make(NO_DSP,mfun("and_",afidx),mfun("or__",ofidx),mfun("then",tfidx,2) ) );
   }
 
-  // Make a natural numbers field, with struct fields isZero,pred,succ,add
-  private static TypeFld nfun( String fld, int alias, int zfidx, int pfidx, int sfidx, int afidx) {
-    return mptr(fld,alias,TypeStruct.make(NO_DSP,mfun("isZero",zfidx),mfun("pred",pfidx),mfun("succ",sfidx), mfun("add",afidx) ));
-  }
-
-
 
   @Test(expected = RuntimeException.class)
   public void test00() { run( "fred","",Type.ALL); }
